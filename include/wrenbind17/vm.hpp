@@ -63,6 +63,14 @@ namespace wrenbind17 {
 
             return name;
         }
+
+        inline void* defaultReallocFn(void* memory, size_t newSize, void* userData) {
+            if (newSize == 0) {
+                std::free(memory);
+                return nullptr;
+            }
+            return std::realloc(memory, newSize);
+        }
     } // namespace detail
 
     /**
@@ -84,6 +92,11 @@ namespace wrenbind17 {
 
     /**
      * @ingroup wrenbind17
+     */
+    typedef std::function<void*(void* memory, size_t newSize, void* userData)> ReallocFn;
+
+    /**
+     * @ingroup wrenbind17
      * @brief Holds the entire Wren VM from which all of the magic happens
      */
     class VM {
@@ -96,7 +109,8 @@ namespace wrenbind17 {
          * @param heapGrowth How the heap should grow
          */
         inline explicit VM(std::vector<std::string> paths = {"./"}, const size_t initHeap = 1024 * 1024,
-                           const size_t minHeap = 1024 * 1024 * 10, const int heapGrowth = 50)
+                           const size_t minHeap = 1024 * 1024 * 10, const int heapGrowth = 50,
+                           ReallocFn reallocFn = detail::defaultReallocFn)
             : data(std::make_unique<Data>()) {
 
             data->paths = std::move(paths);
@@ -113,14 +127,8 @@ namespace wrenbind17 {
             data->config.userData = data.get();
 
 #if WREN_VERSION_NUMBER >= 4000 // >= 0.4.0
-            data->config.reallocateFn = [](void* memory, size_t newSize, void* userData) -> void* {
-                if (newSize == 0) {
-                    std::free(memory);
-                    return nullptr;
-                }
-                return std::realloc(memory, newSize);
-            };
-            data->config.loadModuleFn = [](WrenVM* vm, const char* name) -> WrenLoadModuleResult {
+            data->config.reallocateFn =
+                reallocFn data->config.loadModuleFn = [](WrenVM* vm, const char* name) -> WrenLoadModuleResult {
                 auto res = WrenLoadModuleResult();
                 auto& self = *reinterpret_cast<VM::Data*>(wrenGetUserData(vm));
 
