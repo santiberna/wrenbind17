@@ -127,8 +127,8 @@ namespace wrenbind17 {
             data->config.userData = data.get();
 
 #if WREN_VERSION_NUMBER >= 4000 // >= 0.4.0
-            data->config.reallocateFn =
-                reallocFn data->config.loadModuleFn = [](WrenVM* vm, const char* name) -> WrenLoadModuleResult {
+            data->config.reallocateFn = reallocFn;
+            data->config.loadModuleFn = [](WrenVM* vm, const char* name) -> WrenLoadModuleResult {
                 auto res = WrenLoadModuleResult();
                 auto& self = *reinterpret_cast<VM::Data*>(wrenGetUserData(vm));
 
