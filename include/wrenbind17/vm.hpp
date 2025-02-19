@@ -92,11 +92,6 @@ namespace wrenbind17 {
 
     /**
      * @ingroup wrenbind17
-     */
-    typedef std::function<void*(void* memory, size_t newSize, void* userData)> ReallocFn;
-
-    /**
-     * @ingroup wrenbind17
      * @brief Holds the entire Wren VM from which all of the magic happens
      */
     class VM {
@@ -110,7 +105,7 @@ namespace wrenbind17 {
          */
         inline explicit VM(std::vector<std::string> paths = {"./"}, const size_t initHeap = 1024 * 1024,
                            const size_t minHeap = 1024 * 1024 * 10, const int heapGrowth = 50,
-                           ReallocFn reallocFn = detail::defaultReallocFn)
+                           WrenReallocateFn reallocFn = detail::defaultReallocFn)
             : data(std::make_unique<Data>()) {
 
             data->paths = std::move(paths);
