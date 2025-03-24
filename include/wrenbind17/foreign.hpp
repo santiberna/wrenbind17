@@ -414,11 +414,12 @@ namespace wrenbind17 {
         template <typename R, typename... Args, R (*Fn)(Args...)> struct ForeignFunctionDetails<R (*)(Args...), Fn> {
             typedef ForeignMethodImpl<Args...> ForeignMethodImplType;
 
-            static std::unique_ptr<ForeignMethodImplType> make(std::string name) {
+            static std::unique_ptr<ForeignMethodImplType> make(std::string name, std::string desc = "") {
                 auto signature = ForeignMethodImplType::generateSignature(name);
                 auto p = detail::ForeignFunctionCaller<R, Args...>::template call<Fn>;
                 name = name + detail::generateNameArgs<Args...>();
-                return std::make_unique<ForeignMethodImplType>(std::move(name), std::move(signature), p, true);
+                return std::make_unique<ForeignMethodImplType>(std::move(name), std::move(signature), p, true,
+                                                               std::move(desc));
             }
         };
 
