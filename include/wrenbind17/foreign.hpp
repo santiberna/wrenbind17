@@ -44,8 +44,8 @@ namespace wrenbind17 {
      */
     class ForeignMethod {
     public:
-        ForeignMethod(std::string name, WrenForeignMethodFn method, const bool isStatic)
-            : name(std::move(name)), method(method), isStatic(isStatic) {
+        ForeignMethod(std::string name, WrenForeignMethodFn method, const bool isStatic, std::string desc = "")
+            : name(std::move(name)), method(method), isStatic(isStatic), desc(std::move(desc)) {
         }
 
         virtual ~ForeignMethod() = default;
@@ -81,6 +81,8 @@ namespace wrenbind17 {
         std::string name;
         WrenForeignMethodFn method;
         bool isStatic;
+
+        std::string desc;
     };
 
     /**
@@ -89,8 +91,9 @@ namespace wrenbind17 {
      */
     class ForeignProp {
     public:
-        ForeignProp(std::string name, WrenForeignMethodFn getter, WrenForeignMethodFn setter, const bool isStatic)
-            : name(std::move(name)), getter(getter), setter(setter), isStatic(isStatic) {
+        ForeignProp(std::string name, WrenForeignMethodFn getter, WrenForeignMethodFn setter, const bool isStatic,
+                    std::string desc = "")
+            : name(std::move(name)), getter(getter), setter(setter), isStatic(isStatic), desc(desc) {
         }
 
         virtual ~ForeignProp() = default;
@@ -139,6 +142,8 @@ namespace wrenbind17 {
         WrenForeignMethodFn getter;
         WrenForeignMethodFn setter;
         bool isStatic;
+
+        std::string desc;
     };
 
     /**
@@ -147,7 +152,8 @@ namespace wrenbind17 {
      */
     class ForeignKlass {
     public:
-        ForeignKlass(std::string name) : name(std::move(name)), allocators{nullptr, nullptr} {
+        ForeignKlass(std::string name, std::string desc)
+            : name(std::move(name)), allocators{nullptr, nullptr}, desc(desc) {
         }
 
         virtual ~ForeignKlass() = default;
@@ -240,6 +246,8 @@ namespace wrenbind17 {
         std::unordered_map<std::string, std::unique_ptr<ForeignMethod>> methods;
         std::unordered_map<std::string, std::unique_ptr<ForeignProp>> props;
         WrenForeignClassMethods allocators;
+
+        std::string desc;
     };
 
     /**
@@ -248,8 +256,9 @@ namespace wrenbind17 {
      */
     template <typename... Args> class ForeignMethodImpl : public ForeignMethod {
     public:
-        ForeignMethodImpl(std::string name, std::string signature, WrenForeignMethodFn fn, const bool isStatic)
-            : ForeignMethod(std::move(name), fn, isStatic), signature(std::move(signature)) {
+        ForeignMethodImpl(std::string name, std::string signature, WrenForeignMethodFn fn, const bool isStatic,
+                          std::string desc = "")
+            : ForeignMethod(std::move(name), fn, isStatic, std::move(desc)), signature(std::move(signature)) {
         }
         ~ForeignMethodImpl() = default;
 
@@ -370,8 +379,9 @@ namespace wrenbind17 {
      */
     template <typename T, typename V> class ForeignPropImpl : public ForeignProp {
     public:
-        ForeignPropImpl(std::string name, WrenForeignMethodFn getter, WrenForeignMethodFn setter, const bool isStatic)
-            : ForeignProp(std::move(name), getter, setter, isStatic) {
+        ForeignPropImpl(std::string name, WrenForeignMethodFn getter, WrenForeignMethodFn setter, const bool isStatic,
+                        std::string desc)
+            : ForeignProp(std::move(name), getter, setter, isStatic, std::move(desc)) {
         }
         ~ForeignPropImpl() = default;
     };
@@ -426,7 +436,7 @@ namespace wrenbind17 {
      */
     template <typename T> class ForeignKlassImpl : public ForeignKlass {
     public:
-        ForeignKlassImpl(std::string name) : ForeignKlass(std::move(name)) {
+        ForeignKlassImpl(std::string name, std::string desc = "") : ForeignKlass(std::move(name), std::move(desc)) {
             allocators.allocate = nullptr;
             allocators.finalize = &detail::ForeignKlassAllocator<T>::finalize;
         }
