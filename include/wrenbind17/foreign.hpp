@@ -105,7 +105,7 @@ namespace wrenbind17 {
         void generate(std::ostream& os) const {
 
             if (desc.size())
-                os << "    // " << desc << "\n";
+                os << "\n" << "    // " << desc << "\n";
 
             if (getter)
                 os << "    foreign " << name << "\n";
@@ -268,7 +268,7 @@ namespace wrenbind17 {
 
         void generate(std::ostream& os) const override {
             if (desc.size())
-                os << "    // " << desc << "\n";
+                os << "\n" << "    // " << desc << "\n";
 
             os << "    foreign " << (isStatic ? "static " : "") << signature << "\n";
         }
