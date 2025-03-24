@@ -41,10 +41,9 @@ namespace wrenbind17 {
             std::swap(name, other.name);
         }
 
-        template <typename T, typename... Others>
-        ForeignKlassImpl<T>& klass(std::string name) {
+        template <typename T, typename... Others> ForeignKlassImpl<T>& klass(std::string name, std::string desc = "") {
             insertKlassCast<T, Others...>();
-            auto ptr = std::make_unique<ForeignKlassImpl<T>>(std::move(name));
+            auto ptr = std::make_unique<ForeignKlassImpl<T>>(std::move(name), std::move(desc));
             auto ret = ptr.get();
             addClassType(vm, this->name, ptr->getName(), typeid(T).hash_code());
             klasses.insert(std::make_pair(ptr->getName(), std::move(ptr)));
